@@ -8,7 +8,7 @@ let language = 'ar', names = { ar:'', en:'' }, touched = { ar:false, en:false },
 const urls = new Set();
 const backgrounds = {};
 const t = key => copy[language][key] || key;
-const fonts = { ar:'Aref Ruqaa', en:'Libre Baskerville' };
+const fonts = { ar:'Thmanyah Serif Display', en:'Thmanyah Serif Display' };
 const bounds = { ar:{x:260,y:322,w:780,h:150}, en:{x:330,y:325,w:630,h:135} };
 function canvas(width=1280,height=1600) { const c=document.createElement('canvas');c.width=width;c.height=height;return c; }
 function loadImage(src) { return new Promise((resolve,reject)=>{const image=new Image();image.onload=()=>resolve(image);image.onerror=reject;image.src=src;}); }
@@ -67,8 +67,8 @@ function showLoadError(){
 async function initialize() {
   ready=false;loadFailed=false;refresh();$('poster-loading').hidden=false;$('poster-loading').textContent=t('loading');
   try{
-    await Promise.all([document.fonts.load('700 88px "Aref Ruqaa"'),document.fonts.load('700 78px "Libre Baskerville"')]);
-    if(!document.fonts.check('700 88px "Aref Ruqaa"')||!document.fonts.check('700 78px "Libre Baskerville"'))throw new Error('fonts');
+    const loadedFonts=await document.fonts.load('700 88px "Thmanyah Serif Display"','السيّد جميل البيطار Mr. John Doe Élodie');
+    if(!loadedFonts.length||!document.fonts.check('700 88px "Thmanyah Serif Display"','السيّد جميل البيطار Mr. John Doe'))throw new Error('fonts');
     await Promise.all(['ar','en'].map(async lang=>{const [original,clean]=await Promise.all([loadImage(`assets/original-${lang}.jpg`),loadImage(`assets/clean-${lang}.png`)]);backgrounds[lang]=cleanedBackground(original,clean,lang);}));
     ready=true;$('poster-loading').hidden=true;clearStatus('status');refresh();if(rows.length)renderRows();
   }catch{

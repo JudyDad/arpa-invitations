@@ -12,4 +12,6 @@ Arabic edit prompt: Remove only the Arabic sample recipient line; reconstruct th
 English edit prompt: Remove only “Mr. John Doe”; reconstruct the warm luminous cream/gold church background. Preserve every other text line, logo, church architecture, border, color, and composition. Preserve 4:5 framing.
 
 ## Dependencies
+
+Recipient names in both Arabic and English now use **Thmanyah Serif Display Bold**, supplied by the user in `Thmanyah-Font-Family.zip`. Its unmodified WOFF2 is included as a data URL in the product stylesheet `dist/thmanyah.css`; it is not exposed as a separate font download. The original fonts below remain for the website's interface headings. Preview, single export, and Excel batch export all share the same Thmanyah canvas rendering and font readiness checks.
 Bundled Aref Ruqaa Bold and Libre Baskerville fonts from Google Fonts (SIL Open Font License), SheetJS Community Edition 0.20.3 (Apache-2.0), and JSZip 3.10.1 (MIT). Assets are served locally, without runtime CDN requests. Feature-detected WebMCP exposes `set_invitation` and `export_invitation_png`; ordinary browsers need no WebMCP support. Registration and state updates were tested with a mock registry; native WebMCP validation was unavailable in the local browser.
