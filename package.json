@@ -1,0 +1,1 @@
+{"name":"arpa-invitation-generator","private":true,"type":"module","scripts":{"test":"node tests/core.test.mjs","check":"node --check dist/app.js && node --check dist/core.js","preview":"node preview.mjs"}}

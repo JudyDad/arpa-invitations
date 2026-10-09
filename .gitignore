@@ -1,0 +1,5 @@
+assets-work/
+qa/
+node_modules/
+*.tar.gz
+*.tar
