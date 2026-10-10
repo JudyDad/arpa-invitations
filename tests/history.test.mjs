@@ -6,3 +6,30 @@ const item=(name='جميل البيطار',language='ar')=>({name,language,width
 test('history is private and writes require CSRF; invalid rows rejected atomically',async()=>{const s=await setup();try{assert.equal((await s.worker.fetch(s.req('/api/invitations'),s.env)).status,401);assert.equal((await s.worker.fetch(s.req('/dashboard'),s.env)).status,303);const data={operationId:crypto.randomUUID(),source:'excel',items:[item(),item('Wrong123','en')]};assert.equal((await s.post(data)).status,400);assert.equal((await s.get()).status,200);assert.equal((await(await s.get()).json()).totals.total,0);assert.equal((await s.post({...data,items:[item()]},{'X-CSRF-Token':''})).status,403);assert.equal((await s.post({...data,items:[item()]},{Origin:'https://evil.test'})).status,403);assert.equal((await s.post({...data,items:[item('الاسم<script>')]})).status,400);assert.equal((await s.post({...data,items:[{...item(),width:10}]})).status,400);}finally{s.DB.close();}});
 test('single and batch counts, duplicate delivery, conflicting operation and distinct recipients',async()=>{const s=await setup();try{const op={operationId:crypto.randomUUID(),source:'single',items:[item()]};assert.equal((await s.post(op)).status,200);assert.equal((await s.post(op)).status,200);assert.equal((await s.post({...op,items:[item('يوسف')]})).status,409);assert.equal((await s.post({operationId:crypto.randomUUID(),source:'excel',items:[item(),item('Dr. Élodie','en')]})).status,200);const result=await(await s.get()).json();assert.deepEqual(result.totals,{total:3,arabic:2,english:1,recipients:2});assert.equal(result.records.length,3);assert.equal((await(await s.get('language=en')).json()).filtered.total,1);assert.equal((await(await s.get('q='+encodeURIComponent('جميل'))).json()).filtered.total,2);assert.equal((await(await s.get('q=%25')).json()).filtered.total,0);assert.equal((await s.get('from=2026-02-30')).status,400);assert.equal((await s.get('from=2026-10-11&to=2026-10-10')).status,400);assert.equal((await s.get('language=xx')).status,400);}finally{s.DB.close();}});
 test('pagination and Damascus date boundaries',async()=>{const s=await setup();try{for(let i=0;i<11;i++)await s.post({operationId:crypto.randomUUID(),source:'excel',items:Array.from({length:5},()=>item())});let result=await(await s.get('page=1')).json();assert.equal(result.totals.total,55);assert.equal(result.records.length,50);assert.equal(result.pages,2);assert.equal((await(await s.get('page=2')).json()).records.length,5);s.DB.raw.prepare('UPDATE invitation_history SET created_at=?').run(Date.parse('2026-10-09T21:15:00Z'));assert.equal((await(await s.get('from=2026-10-10&to=2026-10-10')).json()).filtered.total,55);assert.equal((await(await s.get('to=2026-10-09')).json()).filtered.total,0);}finally{s.DB.close();}});
+test('confirmed API deletion requires authentication and CSRF, refreshes totals and cannot be resurrected by retries',async()=>{
+  const s=await setup();try{
+    const operation={operationId:crypto.randomUUID(),source:'excel',items:[item(),item('Dr. Élodie','en')]};await s.post(operation);
+    const records=(await(await s.get()).json()).records,english=records.find(record=>record.language==='en');
+    const remove=(id,extra={})=>s.worker.fetch(s.req('/api/invitations',{method:'DELETE',headers:{...s.headers,...extra},body:JSON.stringify({id})}),s.env);
+    assert.equal((await remove(english.id,{Cookie:''})).status,401);
+    assert.equal((await remove(english.id,{'X-CSRF-Token':''})).status,403);
+    assert.equal((await remove(english.id,{Origin:'https://evil.test'})).status,403);
+    assert.equal((await remove('invalid')).status,400);
+    assert.equal((await remove(crypto.randomUUID()+':0')).status,404);
+    assert.equal((await remove(english.id)).status,200);
+    let result=await(await s.get()).json();assert.deepEqual(result.totals,{total:1,arabic:1,english:0,recipients:1});
+    assert.equal(s.DB.raw.prepare('SELECT COUNT(*) AS n FROM invitation_history WHERE id=?').get(english.id).n,0);
+    assert.equal((await remove(english.id)).status,200);
+    assert.equal((await s.post(operation)).status,200);result=await(await s.get()).json();assert.equal(result.totals.total,1);
+    assert.equal((await remove(result.records[0].id)).status,200);result=await(await s.get()).json();assert.equal(result.totals.total,0);assert.equal(result.pages,1);
+  }finally{s.DB.close();}
+});
+test('deleting the final row on the last page clamps pagination and keeps other entries',async()=>{
+  const s=await setup();try{
+    for(let i=0;i<10;i++)await s.post({operationId:crypto.randomUUID(),source:'excel',items:Array.from({length:5},()=>item())});
+    await s.post({operationId:crypto.randomUUID(),source:'single',items:[item('Guest','en')]});
+    const last=(await(await s.get('page=2')).json()).records[0];
+    assert.equal((await s.worker.fetch(s.req('/api/invitations',{method:'DELETE',headers:s.headers,body:JSON.stringify({id:last.id})}),s.env)).status,200);
+    const result=await(await s.get('page=2')).json();assert.equal(result.page,1);assert.equal(result.pages,1);assert.equal(result.records.length,50);assert.equal(result.totals.total,50);
+  }finally{s.DB.close();}
+});

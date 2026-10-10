@@ -1,5 +1,5 @@
 import {configured,sessionFor,reserveLogin,readSmallBody,verifyPassword,constantEqual,createSession,sessionCookie,sameOrigin} from './auth.js';
-import {recordInvitations,invitationDashboard} from './history.js';
+import {recordInvitations,invitationDashboard,deleteInvitation} from './history.js';
 const SECURITY={
   'Cache-Control':'private, no-store, max-age=0','Pragma':'no-cache','X-Content-Type-Options':'nosniff','Referrer-Policy':'same-origin','X-Frame-Options':'DENY',
   'Content-Security-Policy':"default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self' data: blob:; font-src 'self' data:; connect-src 'self' blob:; worker-src 'self'; form-action 'self'; base-uri 'none'; frame-ancestors 'none'; object-src 'none'",
@@ -37,9 +37,9 @@ export function createWorker(assets){return {async fetch(request,env){
     if(!session){if(path==='/'||path==='/index.html'||path==='/dashboard')return redirect('/login',{'Set-Cookie':sessionCookie('',env,true)});return json({error:'Sign in required'},401);}
     if(path==='/api/invitations'){
       if(request.method==='GET'){const result=await invitationDashboard(url,env);return json(result.body,result.status);}
-      if(request.method!=='POST')return respond('Method not allowed',405,{Allow:'GET, POST'});
+      if(!['POST','DELETE'].includes(request.method))return respond('Method not allowed',405,{Allow:'GET, POST, DELETE'});
       if(!sameOrigin(request,env)||!constantEqual(request.headers.get('X-CSRF-Token')||'',session.csrf_token))return respond('Forbidden',403);
-      const result=await recordInvitations(request,env);return json(result.body,result.status);
+      const result=await (request.method==='DELETE'?deleteInvitation:recordInvitations)(request,env);return json(result.body,result.status);
     }
     if(path==='/api/session'){
       if(request.method!=='GET')return respond('Method not allowed',405,{Allow:'GET'});

@@ -8,11 +8,23 @@ export async function recordInvitations(request,env){
   for(const item of data.items){if(!item||typeof item.name!=='string'||typeof item.language!=='string')return {status:400,body:{error:'Invalid recipient'}};const result=validateName(item.name,item.language);if(result.error||![[4000,5000],[3200,4000],[2560,3200]].some(([w,h])=>w===item.width&&h===item.height))return {status:400,body:{error:'Invalid recipient or image size'}};items.push({name:result.name,language:item.language,width:item.width,height:item.height});}
   const hash=await digest(JSON.stringify({source:data.source,items})),now=Date.now();
   const statements=[env.DB.prepare('INSERT OR IGNORE INTO invitation_operations (id,payload_hash,created_at) VALUES (?,?,?)').bind(data.operationId,hash,now)];
-  items.forEach((item,index)=>statements.push(env.DB.prepare('INSERT OR IGNORE INTO invitation_history (id,operation_id,row_index,name,language,source,width,height,created_at) SELECT ?,?,?,?,?,?,?,?,? WHERE EXISTS (SELECT 1 FROM invitation_operations WHERE id=? AND payload_hash=?)').bind(data.operationId+':'+index,data.operationId,index,item.name,item.language,data.source,item.width,item.height,now,data.operationId,hash)));
+  items.forEach((item,index)=>statements.push(env.DB.prepare('INSERT OR IGNORE INTO invitation_history (id,operation_id,row_index,name,language,source,width,height,created_at) SELECT ?,?,?,?,?,?,?,?,? WHERE EXISTS (SELECT 1 FROM invitation_operations WHERE id=? AND payload_hash=?) AND NOT EXISTS (SELECT 1 FROM deleted_invitation_rows WHERE id=?)').bind(data.operationId+':'+index,data.operationId,index,item.name,item.language,data.source,item.width,item.height,now,data.operationId,hash,data.operationId+':'+index)));
   await env.DB.batch(statements);
   const operation=await env.DB.prepare('SELECT payload_hash FROM invitation_operations WHERE id=?').bind(data.operationId).first();
   if(operation.payload_hash!==hash)return {status:409,body:{error:'Generation identifier already used'}};
   return {status:200,body:{recorded:items.length}};
+}
+export async function deleteInvitation(request,env){
+  if(!request.headers.get('Content-Type')?.startsWith('application/json'))return {status:415,body:{error:'Use JSON'}};
+  let data;try{data=JSON.parse(await readSmallBody(request,1024));}catch{return {status:400,body:{error:'Invalid request'}};}
+  if(!data||typeof data.id!=='string'||! /^[a-f0-9-]{36}:[0-4]$/i.test(data.id))return {status:400,body:{error:'Invalid invitation identifier'}};
+  const exists=await env.DB.prepare('SELECT id FROM invitation_history WHERE id=?').bind(data.id).first(),deleted=await env.DB.prepare('SELECT id FROM deleted_invitation_rows WHERE id=?').bind(data.id).first();
+  if(!exists&&!deleted)return {status:404,body:{error:'Invitation not found'}};
+  await env.DB.batch([
+    env.DB.prepare('INSERT OR IGNORE INTO deleted_invitation_rows (id,deleted_at) VALUES (?,?)').bind(data.id,Date.now()),
+    env.DB.prepare('DELETE FROM invitation_history WHERE id=?').bind(data.id)
+  ]);
+  return {status:200,body:{deleted:true}};
 }
 function dateBound(value,end=false){if(!/^\d{4}-\d{2}-\d{2}$/.test(value))throw new Error('date');const date=new Date(value+'T00:00:00+03:00');if(!Number.isFinite(date.getTime())||new Date(date.getTime()+3*3600000).toISOString().slice(0,10)!==value)throw new Error('date');return date.getTime()+(end?86400000:0);}
 export async function invitationDashboard(url,env){
