@@ -14,7 +14,7 @@ Import .xlsx/.xls with Name and optional Language (ar/en). Blank languages use t
 
 ## Private server
 
-Sites access is owner-only and the app requires admin login. The Worker protects the generator, dashboard, fonts and invitation artwork with no static bypass; only the login page and its explicit branding assets/password-eye script bypass the app login. D1 stores authentication metadata and invitation history. Deployment applies `drizzle/` migrations. Bindings: DB, ADMIN_USERNAME, ADMIN_PASSWORD_HASH (secret), APP_ORIGIN. Credential rotation invalidates sessions.
+The current Sites audience allows everyone to reach the login page; the app requires admin login for the generator and dashboard. The Worker protects fonts, invitation artwork and history with no static bypass; only the login page and its explicit branding assets/password-eye script bypass the app login. D1 stores authentication metadata and invitation history. Deployment applies `drizzle/` migrations. Bindings: DB, ADMIN_USERNAME, ADMIN_PASSWORD_HASH (secret), APP_ORIGIN. Credential rotation invalidates sessions.
 
 ## Dashboard
 
