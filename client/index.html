@@ -5,6 +5,8 @@
   <meta name="theme-color" content="#472b19">
   <meta name="description" content="Create personalized ARPA concert invitations in Arabic and English. Import guest names from Excel and download high-resolution images.">
   <title>ARPA · Invitations</title>
+  <meta name="robots" content="noindex,nofollow">
+  <!--CSRF_META-->
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%23472b19'/%3E%3Cpath d='M8 24L16 7l8 17M11 19h10' fill='none' stroke='%23eed6a7' stroke-width='3'/%3E%3C/svg%3E">
   <link rel="stylesheet" href="styles.css">
   <link rel="stylesheet" href="thmanyah.css">
@@ -12,7 +14,7 @@
   <script type="module" src="app.js"></script>
 </head>
 <body>
-  <header class="masthead"><a class="brand" href="./" aria-label="ARPA Invitations"><span class="brand-mark">A</span><span><strong>ARPA</strong><small>CHOIR &amp; ORCHESTRA</small></span></a><span class="event-note">17 OCTOBER 2026 · ALEPPO</span></header>
+  <header class="masthead"><a class="brand" href="./" aria-label="ARPA Invitations"><span class="brand-mark">A</span><span><strong>ARPA</strong><small>CHOIR &amp; ORCHESTRA</small></span></a><span class="event-note">17 OCTOBER 2026 · ALEPPO</span><button id="logout" class="text-button" type="button">تسجيل الخروج · Sign out</button></header>
   <main>
     <section class="workspace" aria-labelledby="page-title">
       <div class="editor">
@@ -22,7 +24,7 @@
         <fieldset class="language-choice"><legend id="language-label">لغة الدعوة</legend><div class="segments"><label><input type="radio" name="language" value="ar" checked><span lang="ar">العربية</span></label><label><input type="radio" name="language" value="en"><span lang="en">English</span></label></div></fieldset>
         <div class="name-field"><label id="name-label" for="name">اسم الضيف مع اللقب</label><input id="name" type="text" autocomplete="off" spellcheck="false" dir="rtl" aria-describedby="name-hint name-error" placeholder="السيّد جميل البيطار"><div class="field-meta"><span id="name-hint">أحرف عربية، مع اللقب إن رغبت.</span><span id="counter" dir="ltr">0 / 80</span></div><p id="name-error" class="error" role="status" aria-live="polite"></p></div>
         <button id="download" class="primary" type="button" disabled><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12m-4-4 4 4 4-4M4 16v5h16v-5"/></svg><span id="download-label">حفظ الدعوة</span></button>
-        <p class="export-note" id="export-note" dir="ltr">PNG عالي الجودة · 2560 × 3200</p>
+        <p class="export-note" id="export-note" dir="ltr">PNG عالي الجودة · 4000 × 5000</p>
         <p id="status" class="status" role="status" aria-live="polite"></p>
         <div class="divider"></div>
         <button id="batch-toggle" class="batch-toggle" type="button" aria-expanded="false" aria-controls="batch-panel"><span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 3h10l4 4v14H5zM15 3v5h4M8 12h8M8 16h8"/></svg><span id="batch-toggle-label">استيراد أسماء من Excel</span></span><span class="plus" aria-hidden="true">+</span></button>

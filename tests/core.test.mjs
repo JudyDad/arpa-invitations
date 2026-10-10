@@ -1,6 +1,6 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
-import {validateName,normalizeName,parseLanguage,importRows,fileName} from '../dist/core.js';
+import {validateName,normalizeName,parseLanguage,importRows,fileName} from '../client/core.js';
 test('valid names, titles, accents and Arabic diacritics',()=>{for(const [name,lang] of [['السيّد جميل البيطار','ar'],['السيدة ماري','ar'],['Mr. John Doe','en'],["Ms. Élodie O’Connor-Smith",'en'],['François','en']])assert.equal(validateName(name,lang).error,null,name);});
 test('required name and safe script boundaries',()=>{for(const name of ['','  ','...'])assert.ok(validateName(name,'ar').error);for(const [name,lang] of [['John','ar'],['جميل','en'],['John جميل','en'],['Ali 123','en'],['علي١','ar'],['Ali 😊','en'],['علي 😀','ar'],['Жан','en'],['山田','en'],['A\u202Eli','en'],['\u0301John','en']])assert.ok(validateName(name,lang).error,name);assert.equal(validateName('A'.repeat(81),'en').error,'length');});
 test('whitespace and language aliases',()=>{assert.equal(normalizeName('  Mr.\tJohn\nDoe  '),'Mr. John Doe');assert.equal(parseLanguage('','ar'),'ar');assert.equal(parseLanguage('EN','ar'),'en');assert.equal(parseLanguage('العربية','en'),'ar');assert.equal(parseLanguage('fr','ar'),null);});

@@ -1,1 +1,1 @@
-{"name":"arpa-invitation-generator","private":true,"type":"module","scripts":{"test":"node tests/core.test.mjs","check":"node --check dist/app.js && node --check dist/core.js","preview":"node preview.mjs"}}
+{"name":"arpa-invitation-generator","private":true,"type":"module","scripts":{"test":"node tests/core.test.mjs && node tests/auth.test.mjs","check":"node --check client/app.js && node --check client/excel-worker.js && node --check worker/router.js && node --check worker/auth.js","build":"node scripts/build-worker.mjs","preview":"node scripts/preview-private.mjs"}}

@@ -1,17 +1,19 @@
-# ARPA invitation generator
+# ARPA invitations
 
-Static, browser-only Arabic and English invitations. Open with `npm run preview`. Run validation checks with `npm test` and `npm run check`.
+Private Arabic and English generator. `npm run preview` starts a loopback-only preview with username `arpa` and the test-only password `local-test-password!`. Production credentials are Sites runtime secrets; the production password is never included in source or browser bundles. Verify with `npm test`, `npm run check`, and `npm run build`.
 
-Excel import accepts .xlsx/.xls, a required `Name` column, and optional `Language` (`ar`/`en`). Blank languages inherit the selection when imported. Multi-sheet files have a worksheet selector. Imports are limited to 10 MB, 500 guest rows, and reasonable worksheet dimensions. Review rows inline; invalid rows remain visible and are excluded from export. ZIPs contain up to 25 invitations each to bound browser memory on mobile. Duplicate names retain separate, indexed filenames. Everything runs locally; no names or files are uploaded or stored.
+## Artwork and exports
 
-## Artwork
-Original JPGs are retained in `dist/assets/original-ar.jpg` and `original-en.jpg`. Built-in imagegen removed only the sample names in the generated assets `clean-ar.png` and `clean-en.png`. Runtime compositing takes only the recipient rectangles from those generated assets and feathers the edges over the originals, preserving original pixels outside those rectangles. Recipient bounds at 1280 × 1600: Arabic (260,322,780,150), English (330,325,630,135). Export uses the same drawing function as the preview, at 2× scale. Artwork remains limited to original JPG detail; names render at export resolution.
+Unmodified electronic invitation originals are retained in `artwork/`. Both are 4000 × 5000 (4:5). Delivery JPGs retain those dimensions and are compressed for deployment. Named designs define the layout; no-name designs supplied visual references for clearing sample recipient lines. Only localized feathered patches cover the recipient areas; other fixed details remain intact.
 
-Arabic edit prompt: Remove only the Arabic sample recipient line; reconstruct the warm luminous cream/gold church background. Preserve every other text line, logo, church architecture, border, color, and composition. Preserve 4:5 framing.
+Preview, single PNG and Excel batch PNG share one canvas routine. Names use supplied Thmanyah Serif Display Bold with Arabic shaping and adaptive one-line fitting. Exports normally use 4000 × 5000; devices unable to allocate that canvas retry 3200 × 4000 and 2560 × 3200, reporting actual size. Mobile users receive a save-image dialog.
 
-English edit prompt: Remove only “Mr. John Doe”; reconstruct the warm luminous cream/gold church background. Preserve every other text line, logo, church architecture, border, color, and composition. Preserve 4:5 framing.
+## Excel
 
-## Dependencies
+Import .xlsx/.xls with Name and optional Language (ar/en). Blank languages use the selection at import. Multi-sheet workbooks have a selector. Review, edit or remove rows; invalid rows cannot export. Limits: 10 MB, 500 guests, bounded worksheet dimensions, 100 sheets and bounded XLSX decompression. Parsing runs in a dedicated Worker terminated after 20 seconds. ZIP groups contain at most 2 invitations on touch devices or 5 on desktop; only the latest ZIP remains in memory. Names and workbooks are never uploaded or persisted.
 
-Recipient names in both Arabic and English now use **Thmanyah Serif Display Bold**, supplied by the user in `Thmanyah-Font-Family.zip`. Its unmodified WOFF2 is included as a data URL in the product stylesheet `dist/thmanyah.css`; it is not exposed as a separate font download. The original fonts below remain for the website's interface headings. Preview, single export, and Excel batch export all share the same Thmanyah canvas rendering and font readiness checks.
-Bundled Aref Ruqaa Bold and Libre Baskerville fonts from Google Fonts (SIL Open Font License), SheetJS Community Edition 0.20.3 (Apache-2.0), and JSZip 3.10.1 (MIT). Assets are served locally, without runtime CDN requests. Feature-detected WebMCP exposes `set_invitation` and `export_invitation_png`; ordinary browsers need no WebMCP support. Registration and state updates were tested with a mock registry; native WebMCP validation was unavailable in the local browser.
+## Private server
+
+Sites access is owner-only and the app requires admin login. The Worker protects all app, script, font and artwork routes with no static bypass. D1 stores hashed session identifiers, CSRF tokens, expirations, credential fingerprints and hashed-IP throttles; no guest names. Deployment applies `drizzle/` migrations. Bindings: DB, ADMIN_USERNAME, ADMIN_PASSWORD_HASH (secret), APP_ORIGIN. Credential rotation invalidates sessions.
+
+Build output is `dist/server/index.js` with `.openai/hosting.json`. Original artwork is not exposed by the server. Bundled local dependencies: SheetJS CE 0.20.3 (Apache-2.0), JSZip 3.10.1 (MIT), Aref Ruqaa and Libre Baskerville interface fonts (SIL OFL), supplied Thmanyah. Feature-detected WebMCP uses the same validation and drawing routine.

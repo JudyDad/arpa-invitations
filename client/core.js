@@ -2,14 +2,16 @@ export const MAX_NAME_LENGTH = 80;
 export function normalizeName(value) { return String(value ?? '').normalize('NFC').replace(/\s+/gu, ' ').trim(); }
 export function validateName(value, language) {
   const name = normalizeName(value);
+  if(!['ar','en'].includes(language))return {name,error:'badLanguage'};
   if (!name) return { name, error: 'empty' };
   if (Array.from(name).length > MAX_NAME_LENGTH) return { name, error: 'length' };
   const script = language === 'ar' ? /\p{Script_Extensions=Arabic}/u : /\p{Script_Extensions=Latin}/u;
   let letters = 0, previousLetter = false;
   for (const char of name) {
+    if(/[\u034f\uFE00-\uFE0F\u{E0100}-\u{E01EF}]/u.test(char))return {name,error:'characters'};
     if (/\p{L}/u.test(char)) {
       if (!script.test(char)) return { name, error: 'script' };
-      letters++; previousLetter = true;
+      if(char!=='ـ')letters++; previousLetter = true;
     } else if (/\p{M}/u.test(char)) {
       const validMark = script.test(char) || (language === 'en' && /\p{Script_Extensions=Inherited}/u.test(char));
       if (!previousLetter || !validMark) return { name, error: 'script' };
