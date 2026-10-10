@@ -14,7 +14,7 @@
   <script type="module" src="app.js"></script>
 </head>
 <body>
-  <header class="masthead"><a class="brand" href="./" aria-label="ARPA Invitations"><img class="brand-logo" src="/assets/arpa-logo.png" alt="ARPA Choir &amp; Orchestra" width="120" height="100"><span class="brand-title">Invitation studio<small>مساحة الدعوات</small></span></a><span class="event-note">17 OCTOBER 2026 · ALEPPO</span><button id="logout" class="text-button" type="button">تسجيل الخروج · Sign out</button></header>
+  <header class="masthead"><a class="brand" href="./" aria-label="ARPA Invitations"><img class="brand-logo" src="/assets/arpa-logo.png" alt="ARPA Choir &amp; Orchestra" width="120" height="100"><span class="brand-title">Invitation studio<small>مساحة الدعوات</small></span></a><nav aria-label="التنقل"><a class="nav-link" href="/" aria-current="page">إنشاء دعوة · Create</a><a class="nav-link" href="/dashboard">لوحة المعلومات · Dashboard</a></nav><button id="logout" class="text-button" type="button">تسجيل الخروج · Sign out</button></header>
   <main>
     <section class="workspace" aria-labelledby="page-title">
       <div class="editor">
@@ -35,7 +35,7 @@
           <p id="import-status" class="status" role="status" aria-live="polite"></p>
           <div id="batch-review" hidden><div class="review-heading"><strong id="review-title">مراجعة الأسماء</strong><span id="review-count"></span></div><p class="review-help" id="review-help">صحّح الصفوف غير الصالحة أو احذفها قبل الحفظ.</p><div id="rows" class="rows"></div><p id="zip-note" class="export-note">حتى 25 دعوة في كل ملف ZIP لتسهيل الحفظ على الهاتف.</p><div id="batch-buttons"></div><button id="cancel" class="text-button" type="button" hidden>إلغاء</button><progress id="progress" max="100" value="0" hidden></progress><div id="zip-results"></div></div>
         </div>
-        <p class="privacy-note" id="privacy-note">تُعالج الأسماء على جهازك فقط ولا يتم تخزينها.</p>
+        <p class="privacy-note" id="privacy-note">تُحفظ أسماء الدعوات المُنشأة وتاريخها في سجل خاص بلوحة المعلومات.</p>
       </div>
       <div class="preview-area"><div class="preview-top"><span id="preview-label">معاينة الدعوة</span><span class="paper-ratio">4 : 5</span></div><div class="poster-frame"><canvas id="poster" width="1280" height="1600" role="img" aria-label="معاينة الدعوة"></canvas><div id="poster-loading" class="poster-loading">جارٍ تجهيز الدعوة…</div></div><p class="preview-caption" id="preview-caption">تبقى تفاصيل الحفل والشعارات ثابتة.</p></div>
     </section>
@@ -44,4 +44,5 @@
   <dialog id="save-dialog"><div class="dialog-heading"><h2 id="save-title">حفظ الصورة</h2><button id="close-dialog" type="button" aria-label="Close">×</button></div><p id="save-help">اضغط مطولاً على الصورة لحفظها، أو استخدم زر التنزيل.</p><img id="save-image" alt="Personalized ARPA invitation"><a id="save-link" class="primary" download>Download PNG</a></dialog>
 </body>
 </html>
+
 

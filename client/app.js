@@ -1,9 +1,14 @@
 import { normalizeName, validateName, importRows, fileName } from './core.js';
+import {recordGeneration} from './generation-history.js';
 const $ = id => document.getElementById(id);
 const copy = {
   ar: { eyebrow:'دعوات الحفل', title:'دعوة باسم ضيفك', intro:'اكتب الاسم مع اللقب، وستكون الدعوة جاهزة للحفظ.', language:'لغة الدعوة', name:'اسم الضيف مع اللقب', placeholder:'السيّد جميل البيطار', hint:'أحرف عربية، مع اللقب إن رغبت.', download:'حفظ الدعوة', export:'PNG عالي الجودة · 4000 × 5000', batch:'استيراد أسماء من Excel', description:'عمود Name للأسماء، وعمود Language اختياري (ar أو en). عند ترك اللغة فارغة تُستخدم اللغة المحددة أعلاه.', file:'اختيار ملف Excel', sample:'تحميل نموذج', sheet:'ورقة العمل', review:'مراجعة الأسماء', help:'صحّح الصفوف غير الصالحة أو احذفها قبل الحفظ.', zip:'ملفات ZIP صغيرة للحفظ على الهاتف. نزّل الملف قبل إنشاء المجموعة التالية.', privacy:'تُعالج الأسماء على جهازك فقط ولا يتم تخزينها.', preview:'معاينة الدعوة', caption:'تبقى تفاصيل الحفل والشعارات ثابتة.', footer:'بمراحم الرب أغنّي', loading:'جارٍ تجهيز الدعوة…', ready:'الدعوة جاهزة للحفظ.', preparing:'جارٍ تجهيز الصور…', cancelled:'تم إلغاء إنشاء الملف.', cancel:'إلغاء', save:'حفظ الصورة', saveHelp:'اضغط مطولاً على الصورة لحفظها، أو استخدم زر التنزيل.', saved:'الصورة جاهزة. إذا لم يبدأ التنزيل، استخدم الصورة المعروضة للحفظ.', remove:'حذف الصف', valid:'صالحة', invalid:'تحتاج تصحيحاً', generation:'إنشاء ZIP', downloadZip:'تنزيل ZIP', done:'الملف جاهز للتنزيل.', empty:'أدخل اسم الضيف قبل الحفظ.', length:'يجب ألا يزيد الاسم عن 80 حرفاً.', script:'استخدم أحرفاً عربية وتشكيلًا عربياً فقط في النسخة العربية.', characters:'استخدم الأحرف والمسافات والنقطة والفاصلة العليا والشرطة فقط؛ لا أرقام أو رموز.', letters:'يجب أن يحتوي الاسم على حرف واحد على الأقل.', fit:'الاسم طويل جداً لعرضه بوضوح. اختصر الاسم أو اللقب.', badLanguage:'اختر ar أو en لهذا الصف.', missingColumn:'لم يتم العثور على عمود Name. استخدم النموذج المتاح.', emptyWorkbook:'لا توجد أسماء في ورقة العمل.', tooManyRows:'استورد 500 اسم أو أقل في كل مرة.', fileSize:'حجم الملف الأقصى 10 ميغابايت.', badFile:'اختر ملف Excel بصيغة .xlsx أو .xls صالح وغير محمي بكلمة مرور.', loadError:'تعذّر تحميل الخطوط أو الدعوة. تحقق من الاتصال ثم أعد المحاولة.', exportError:'تعذّر تجهيز الصورة. أعد المحاولة.', zipError:'تعذّر إنشاء ZIP. جرّب عددًا أقل من الأسماء.', retry:'إعادة المحاولة', imported:'تم استيراد الأسماء. راجعها قبل الحفظ.', unavailable:'تعذّر تحميل أدوات Excel. أعد تحميل الصفحة.', tooLargeSheet:'ورقة العمل كبيرة جداً. استخدم ملفاً يحتوي على الأسماء فقط.' },
   en: { eyebrow:'CONCERT INVITATIONS', title:'An invitation, personally yours.', intro:'Enter your guest’s name and title. Your invitation is ready to save.', language:'Invitation language', name:'Guest name and title', placeholder:'Mr. John Doe', hint:'Use English letters, including the title if desired.', download:'Save invitation', export:'High-resolution PNG · 4000 × 5000', batch:'Import names from Excel', description:'Use a Name column and an optional Language column (ar or en). Blank languages use the selection above.', file:'Choose Excel file', sample:'Download template', sheet:'Worksheet', review:'Review names', help:'Correct invalid rows or remove them before saving.', zip:'Small ZIP batches for easier saving on mobile. Download each ZIP before creating the next.', privacy:'Names stay on your device and are never stored.', preview:'INVITATION PREVIEW', caption:'Concert details and logos stay fixed.', footer:'Misericordias Domini Cantabo', loading:'Preparing your invitation…', ready:'Your invitation is ready to save.', preparing:'Preparing images…', cancelled:'ZIP generation cancelled.', cancel:'Cancel', save:'Save image', saveHelp:'Touch and hold the image to save it, or use the download button.', saved:'Your image is ready. If the download did not start, save the image shown here.', remove:'Remove row', valid:'valid', invalid:'need correction', generation:'Create ZIP', downloadZip:'Download ZIP', done:'Your ZIP is ready to download.', empty:'Enter a guest name before saving.', length:'Names must contain no more than 80 characters.', script:'Use Latin letters, including accented letters, in the English version.', characters:'Use letters, spaces, periods, apostrophes, and hyphens only; no numbers or symbols.', letters:'The name must contain at least one letter.', fit:'This name is too long to display clearly. Shorten the name or title.', badLanguage:'Choose ar or en for this row.', missingColumn:'No Name column was found. Please use the downloadable template.', emptyWorkbook:'No names were found in this worksheet.', tooManyRows:'Import no more than 500 names at a time.', fileSize:'The maximum file size is 10 MB.', badFile:'Choose a valid .xlsx or .xls file that is not password protected.', loadError:'Unable to load the fonts or invitation. Check your connection and try again.', exportError:'Unable to prepare the image. Please try again.', zipError:'Unable to create this ZIP. Try fewer names.', retry:'Try again', imported:'Names imported. Review them before saving.', unavailable:'Excel tools could not load. Please reload the page.', tooLargeSheet:'This worksheet is too large. Use a file containing only your guest list.' }
 };
+copy.ar.privacy='تُحفظ أسماء الدعوات المُنشأة وتاريخها في سجل خاص بلوحة المعلومات. لا تُرفع ملفات Excel أو الصور.';
+copy.en.privacy='Generated recipient names and dates are saved in your private dashboard. Excel files and images are not uploaded.';
+copy.ar.historyError='تعذّر تحديث سجل الدعوات. تحقق من الاتصال ثم أعد الحفظ.';
+copy.en.historyError='Unable to update invitation history. Check your connection and try saving again.';
 let language = 'ar', names = { ar:'', en:'' }, touched = { ar:false, en:false }, ready = false, loadFailed = false, busy = false, exporting = false, cancelled = false, rows = [], workbook = null, importFallback = 'ar', saveURL = null;
 const urls = new Set();
 const backgrounds = {};
@@ -100,11 +105,13 @@ async function exportSingle(){
   try{
     await assertSession();const {blob,width,height}=await makePNG(result.name,selected),filename=fileName(result.name,selected);
     if(epoch!==privateEpoch)throw new Error('cancelled');
+    await recordGeneration('single',[{name:result.name,language:selected,width,height}],crypto.randomUUID());
+    if(epoch!==privateEpoch)throw new Error('cancelled');
     if(saveURL){URL.revokeObjectURL(saveURL);urls.delete(saveURL);}
     saveURL=downloadBlob(blob,filename);$('save-image').src=saveURL;$('save-link').href=saveURL;$('save-link').download=filename;
     if(matchMedia('(pointer: coarse)').matches)$('save-dialog').showModal();
     status('status',`${t('saved')} · ${width} × ${height}`);return {name:result.name,language:selected,filename,width,height,url:saveURL};
-  }catch(error){status('status',t(error.message==='fit'?'fit':'exportError'),true);throw error;}
+  }catch(error){status('status',t(['fit','historyError'].includes(error.message)?error.message:'exportError'),true);throw error;}
   finally{exporting=false;setBusyControls();refresh();updateBatchButtons();}
 }
 $('name').addEventListener('input',()=>{names[language]=$('name').value;touched[language]=true;clearStatus('status');refresh();});
@@ -178,14 +185,15 @@ async function exportBatch(start){
   const valid=validRows(),selected=valid.slice(start,start+BATCH_SIZE).map(row=>({...row}));if(!selected.length)throw new Error('emptyWorkbook');
   busy=true;cancelled=false;$('progress').value=0;setBusyControls();refresh();updateBatchButtons();status('import-status',t('preparing'));
   try{
-    await assertSession();clearZIPs();const zip=new JSZip();
+    await assertSession();clearZIPs();const zip=new JSZip(),generated=[];
     for(let i=0;i<selected.length;i++){
-      if(cancelled)throw new Error('cancelled');const row=selected[i],{blob}=await makePNG(row.name,row.language);zip.file(fileName(row.name,row.language,start+i),blob);$('progress').value=Math.round((i+1)/selected.length*85);await pause();
+      if(cancelled)throw new Error('cancelled');const row=selected[i],{blob,width,height}=await makePNG(row.name,row.language);generated.push({name:normalizeName(row.name),language:row.language,width,height});zip.file(fileName(row.name,row.language,start+i),blob);$('progress').value=Math.round((i+1)/selected.length*85);await pause();
     }
     if(cancelled)throw new Error('cancelled');const blob=await zip.generateAsync({type:'blob',compression:'STORE'},meta=>{$('progress').value=85+Math.round(meta.percent*.15);});if(cancelled)throw new Error('cancelled');
+    await recordGeneration('excel',generated,crypto.randomUUID());if(cancelled)throw new Error('cancelled');
     const filename=`ARPA-invitations-${start+1}-${start+selected.length}.zip`,url=objectURL(blob),result=document.createElement('div');zipURLs.add(url);result.className='zip-result';const label=document.createElement('span');label.textContent=`${selected.length} PNG · ${Math.ceil(blob.size/1024/1024)} MB`;const link=document.createElement('a');link.href=url;link.download=filename;link.textContent=`${t('downloadZip')} ${start+1}–${start+selected.length}`;result.append(label,link);$('zip-results').append(result);status('import-status',t('done'));link.focus();
     return {count:selected.length,filename,url};
-  }catch(error){status('import-status',t(error.message==='cancelled'?'cancelled':'zipError'),error.message!=='cancelled');throw error;}
+  }catch(error){status('import-status',t(['cancelled','historyError'].includes(error.message)?error.message:'zipError'),error.message!=='cancelled');throw error;}
   finally{busy=false;setBusyControls();refresh();updateBatchButtons();}
 }
 $('cancel').addEventListener('click',()=>{cancelled=true;});

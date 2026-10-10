@@ -1,4 +1,5 @@
 import {configured,sessionFor,reserveLogin,readSmallBody,verifyPassword,constantEqual,createSession,sessionCookie,sameOrigin} from './auth.js';
+import {recordInvitations,invitationDashboard} from './history.js';
 const SECURITY={
   'Cache-Control':'private, no-store, max-age=0','Pragma':'no-cache','X-Content-Type-Options':'nosniff','Referrer-Policy':'same-origin','X-Frame-Options':'DENY',
   'Content-Security-Policy':"default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self' data: blob:; font-src 'self' data:; connect-src 'self' blob:; worker-src 'self'; form-action 'self'; base-uri 'none'; frame-ancestors 'none'; object-src 'none'",
@@ -33,7 +34,13 @@ export function createWorker(assets){return {async fetch(request,env){
       const token=await createSession(env);return redirect('/',{'Set-Cookie':sessionCookie(token,env)});
     }
     const session=await sessionFor(request,env);
-    if(!session){if(path==='/'||path==='/index.html')return redirect('/login',{'Set-Cookie':sessionCookie('',env,true)});return json({error:'Sign in required'},401);}
+    if(!session){if(path==='/'||path==='/index.html'||path==='/dashboard')return redirect('/login',{'Set-Cookie':sessionCookie('',env,true)});return json({error:'Sign in required'},401);}
+    if(path==='/api/invitations'){
+      if(request.method==='GET'){const result=await invitationDashboard(url,env);return json(result.body,result.status);}
+      if(request.method!=='POST')return respond('Method not allowed',405,{Allow:'GET, POST'});
+      if(!sameOrigin(request,env)||!constantEqual(request.headers.get('X-CSRF-Token')||'',session.csrf_token))return respond('Forbidden',403);
+      const result=await recordInvitations(request,env);return json(result.body,result.status);
+    }
     if(path==='/api/session'){
       if(request.method!=='GET')return respond('Method not allowed',405,{Allow:'GET'});
       return json({authenticated:true,expiresAt:session.expires_at*1000});
@@ -44,10 +51,10 @@ export function createWorker(assets){return {async fetch(request,env){
       await env.DB.prepare('DELETE FROM auth_sessions WHERE token_hash = ?').bind(session.token_hash).run();return json({signedOut:true},200,{'Set-Cookie':sessionCookie('',env,true)});
     }
     if(!['GET','HEAD'].includes(request.method))return respond('Method not allowed',405,{Allow:'GET, HEAD'});
-    const key=path==='/'?'/index.html':path;
+    const key=path==='/'?'/index.html':path==='/dashboard'?'/dashboard.html':path;
     if(!Object.hasOwn(assets,key)||['/login.html','/login.css'].includes(key))return respond('Not found',404);
     const asset=assets[key];let body=request.method==='HEAD'?null:asset.text??bytes(asset.base64);
-    if(key==='/index.html'&&body)body=body.replace('<!--CSRF_META-->',`<meta name="csrf-token" content="${session.csrf_token}">`);
+    if(['/index.html','/dashboard.html'].includes(key)&&body)body=body.replace('<!--CSRF_META-->',`<meta name="csrf-token" content="${session.csrf_token}">`);
     return respond(body,200,{'Content-Type':asset.type,'Vary':'Cookie'});
   }catch{return respond('The service is temporarily unavailable. Please try again.',503,{'Content-Type':'text/plain; charset=utf-8'});}
 }};}

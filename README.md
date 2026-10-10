@@ -10,11 +10,17 @@ Preview, single PNG and Excel batch PNG share one canvas routine. Names use supp
 
 ## Excel
 
-Import .xlsx/.xls with Name and optional Language (ar/en). Blank languages use the selection at import. Multi-sheet workbooks have a selector. Review, edit or remove rows; invalid rows cannot export. Limits: 10 MB, 500 guests, bounded worksheet dimensions, 100 sheets and bounded XLSX decompression. Parsing runs in a dedicated Worker terminated after 20 seconds. ZIP groups contain at most 2 invitations on touch devices or 5 on desktop; only the latest ZIP remains in memory. Names and workbooks are never uploaded or persisted.
+Import .xlsx/.xls with Name and optional Language (ar/en). Blank languages use the selection at import. Multi-sheet workbooks have a selector. Review, edit or remove rows; invalid rows cannot export. Limits: 10 MB, 500 guests, bounded worksheet dimensions, 100 sheets and bounded XLSX decompression. Parsing runs in a dedicated Worker terminated after 20 seconds. ZIP groups contain at most 2 invitations on touch devices or 5 on desktop; only the latest ZIP remains in memory. Workbook files and images remain in the browser. Successful generation records recipient names, languages, timestamps, source and output dimensions in the private dashboard database.
 
 ## Private server
 
-Sites access is owner-only and the app requires admin login. The Worker protects the generator, fonts and invitation artwork with no static bypass; only the login page and its explicit branding assets/password-eye script bypass the app login. D1 stores hashed session identifiers, CSRF tokens, expirations, credential fingerprints and hashed-IP throttles; no guest names. Deployment applies `drizzle/` migrations. Bindings: DB, ADMIN_USERNAME, ADMIN_PASSWORD_HASH (secret), APP_ORIGIN. Credential rotation invalidates sessions.
+Sites access is owner-only and the app requires admin login. The Worker protects the generator, dashboard, fonts and invitation artwork with no static bypass; only the login page and its explicit branding assets/password-eye script bypass the app login. D1 stores authentication metadata and invitation history. Deployment applies `drizzle/` migrations. Bindings: DB, ADMIN_USERNAME, ADMIN_PASSWORD_HASH (secret), APP_ORIGIN. Credential rotation invalidates sessions.
+
+## Dashboard
+
+Visit `/dashboard` for all-time total, Arabic, English and distinct-recipient counts. The history starts with this feature; previous browser-only exports cannot be recovered. One generated image is one invitation, including individual images inside a completed ZIP. Re-generating an invitation counts again; retrying an identical record request does not. Counts indicate generated images, not verified saves or delivery to guests. Draft names, invalid inputs and cancelled ZIPs before recording are excluded. A cancellation/sign-out after the server has committed a record may leave that generated image in history even if no download is presented.
+
+Search by name, filter by language and inclusive dates (Damascus time), browse pages of 50, and export matching records to Excel (maximum 10000 per report). History and exports require an authenticated admin. POST records require CSRF plus exact Origin, shared server-side name validation, bounded batch sizes and idempotent operation identifiers. No image data or workbook files are stored.
 
 The supplied gold logo preserves its exact lettering in navigation and login. Interface English headings prefer a locally installed Algerian face, with bundled Libre Baskerville fallback; no commercial font is redistributed. Arabic studio headings and poster names use supplied Thmanyah. The supplied concert cover is optimized for the responsive login panel.
 
