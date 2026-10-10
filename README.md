@@ -14,6 +14,8 @@ Import .xlsx/.xls with Name and optional Language (ar/en). Blank languages use t
 
 ## Private server
 
-Sites access is owner-only and the app requires admin login. The Worker protects all app, script, font and artwork routes with no static bypass. D1 stores hashed session identifiers, CSRF tokens, expirations, credential fingerprints and hashed-IP throttles; no guest names. Deployment applies `drizzle/` migrations. Bindings: DB, ADMIN_USERNAME, ADMIN_PASSWORD_HASH (secret), APP_ORIGIN. Credential rotation invalidates sessions.
+Sites access is owner-only and the app requires admin login. The Worker protects the generator, fonts and invitation artwork with no static bypass; only the login page and its explicit branding assets/password-eye script bypass the app login. D1 stores hashed session identifiers, CSRF tokens, expirations, credential fingerprints and hashed-IP throttles; no guest names. Deployment applies `drizzle/` migrations. Bindings: DB, ADMIN_USERNAME, ADMIN_PASSWORD_HASH (secret), APP_ORIGIN. Credential rotation invalidates sessions.
+
+The supplied gold logo preserves its exact lettering in navigation and login. Interface English headings prefer a locally installed Algerian face, with bundled Libre Baskerville fallback; no commercial font is redistributed. Arabic studio headings and poster names use supplied Thmanyah. The supplied concert cover is optimized for the responsive login panel.
 
 Build output is `dist/server/index.js` with `.openai/hosting.json`. Original artwork is not exposed by the server. Bundled local dependencies: SheetJS CE 0.20.3 (Apache-2.0), JSZip 3.10.1 (MIT), Aref Ruqaa and Libre Baskerville interface fonts (SIL OFL), supplied Thmanyah. Feature-detected WebMCP uses the same validation and drawing routine.

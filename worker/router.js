@@ -16,7 +16,8 @@ export function createWorker(assets){return {async fetch(request,env){
       const message={invalid:'اسم المستخدم أو كلمة المرور غير صحيحة. / Incorrect username or password.',limited:'محاولات كثيرة. حاول مرة أخرى بعد 15 دقيقة. / Too many attempts. Try again in 15 minutes.',expired:'انتهت الجلسة. يرجى تسجيل الدخول مجدداً. / Your session expired. Sign in again.'}[url.searchParams.get('error')]||'';
       return respond(request.method==='HEAD'?null:assets['/login.html'].text.replace('<!--LOGIN_ERROR-->',message),200,{'Content-Type':'text/html; charset=utf-8'});
     }
-    if(path==='/login.css'&&['GET','HEAD'].includes(request.method))return respond(request.method==='HEAD'?null:assets[path].text,200,{'Content-Type':'text/css; charset=utf-8'});
+    const loginAssets=['/login.css','/login.js','/assets/arpa-logo.png','/assets/arpa-cover.jpg'];
+    if(loginAssets.includes(path)&&['GET','HEAD'].includes(request.method)){const asset=assets[path];return respond(request.method==='HEAD'?null:asset.text??bytes(asset.base64),200,{'Content-Type':asset.type});}
     if(!configured(env))return respond('Sign in is temporarily unavailable.',503,{'Content-Type':'text/plain; charset=utf-8'});
     if(path==='/api/login'){
       if(request.method!=='POST')return respond('Method not allowed',405,{Allow:'POST'});

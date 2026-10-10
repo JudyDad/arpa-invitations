@@ -4,7 +4,8 @@ import {gzipSync} from 'node:zlib';
 const root=process.cwd(),output=path.resolve(root,'dist');
 if(output!==path.join(root,'dist')||!output.startsWith(root+path.sep))throw new Error('Unsafe build output');
 const resources=['index.html','styles.css','thmanyah.css','app.js','core.js','excel-worker.js','login.html','login.css','assets/template-ar.jpg','assets/template-en.jpg','assets/clean-ar.jpg','assets/clean-en.jpg','assets/aref-ruqaa-bold.ttf','assets/libre-baskerville.ttf','assets/xlsx.full.min.js','assets/jszip.min.js'];
-const types={'.html':'text/html; charset=utf-8','.css':'text/css; charset=utf-8','.js':'text/javascript; charset=utf-8','.jpg':'image/jpeg','.ttf':'font/ttf'};
+resources.push('login.js','assets/arpa-logo.png','assets/arpa-cover.jpg');
+const types={'.html':'text/html; charset=utf-8','.css':'text/css; charset=utf-8','.js':'text/javascript; charset=utf-8','.jpg':'image/jpeg','.png':'image/png','.ttf':'font/ttf'};
 const assets=Object.create(null);
 for(const file of resources){const data=await readFile(path.join(root,'client',file)),extension=path.extname(file);assets['/'+file]={type:types[extension],...(['.html','.css','.js'].includes(extension)?{text:data.toString('utf8')}:{base64:data.toString('base64')})};}
 const auth=await readFile('worker/auth.js','utf8'),router=(await readFile('worker/router.js','utf8')).replace(/^import[^\n]+\n/,'');
