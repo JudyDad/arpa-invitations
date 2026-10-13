@@ -5,15 +5,16 @@ export function validateName(value, language) {
   if(!['ar','en'].includes(language))return {name,error:'badLanguage'};
   if (!name) return { name, error: 'empty' };
   if (Array.from(name).length > MAX_NAME_LENGTH) return { name, error: 'length' };
-  const script = language === 'ar' ? /\p{Script_Extensions=Arabic}/u : /\p{Script_Extensions=Latin}/u;
+  const arabic = /\p{Script_Extensions=Arabic}/u, latin = /\p{Script_Extensions=Latin}/u;
+  const script = language === 'ar' ? /[\p{Script_Extensions=Arabic}\p{Script_Extensions=Latin}]/u : latin;
   let letters = 0, previousLetter = false;
   for (const char of name) {
     if(/[\u034f\uFE00-\uFE0F\u{E0100}-\u{E01EF}]/u.test(char))return {name,error:'characters'};
     if (/\p{L}/u.test(char)) {
       if (!script.test(char)) return { name, error: 'script' };
-      if(char!=='ـ')letters++; previousLetter = true;
+      if(char!=='ـ')letters++; previousLetter = latin.test(char) ? 'latin' : 'arabic';
     } else if (/\p{M}/u.test(char)) {
-      const validMark = script.test(char) || (language === 'en' && /\p{Script_Extensions=Inherited}/u.test(char));
+      const validMark = previousLetter === 'arabic' ? arabic.test(char) : latin.test(char) || /\p{Script_Extensions=Inherited}/u.test(char);
       if (!previousLetter || !validMark) return { name, error: 'script' };
     } else if (/^[ .'’\-]$/u.test(char)) previousLetter = false;
     else return { name, error: 'characters' };
